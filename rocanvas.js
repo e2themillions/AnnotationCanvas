@@ -1,7 +1,15 @@
 /* RoCanvas.js version 1.4.0
 * Converts any canvas object into a RoCanvas HTML 5 Drawing board
 * Adds tools, shapes, color and size selection, etc
-* Full documentation at http://re.trotoys.com/article/rocanvas/ */
+* Full documentation at http://re.trotoys.com/article/rocanvas/ 
+*
+*
+* Modified by Emil:
+* - added optional background image
+* - fixed flickering bug when drawing shapes
+* - made non-filled objects non-filled (instead of white-filled)
+* 
+**/
 
 // rocanvas instances
 var RoCanvasInstances = {};
@@ -16,7 +24,7 @@ var RoCanvas= function () {
 	this.clearCircle = [0,0,0];
 	this.clickDrag = [];
 	this.paint = false;
-	this.context = {};	
+	this.context = {};
 	
 	// changeable defaults
 	this.shape = "round";	
@@ -24,6 +32,8 @@ var RoCanvas= function () {
 	this.tool = "path";
 	this.drawTool = "path";
 	this.lineWidth = 5;
+	this.bgImage = null; //this is the initial background image
+	this.currentBgImage = null; //this is the current background updated on mouse-up events..
 	
 	// toolbar
 	this.toolbar = {
@@ -36,10 +46,11 @@ var RoCanvas= function () {
 	};
 	
 	var self = this;
+
 	
 	// the "constructor" that actually takes a div and converts it into RoCanvas
 	// @param id string, the DOM ID of the div
-	// @param vars - optionally pass custom vars, toolbar etc  
+	// @param vars - optionally pass custom vars, toolbar, backgroundImage etc  
 	this.RO = function(id, vars) {		
 		self.id = id;
 		
@@ -66,9 +77,8 @@ var RoCanvas= function () {
 			// allow only shape, color, tool, lineWidth
 			for(var key in vars['settings'])
 			{
-				if(!(key=='shape' || key=='color' || key=='tool' || key=='lineWidth')) continue;
-				
-				self[key]=vars['settings'][key];			
+				if(!(key=='shape' || key=='color' || key=='tool' || key=='lineWidth')) continue;				
+				self[key]=vars['settings'][key];
 			}
 		}	
 		
@@ -76,20 +86,30 @@ var RoCanvas= function () {
 		self.canvas = document.getElementById(id);			
 		document.getElementById(id).style.cursor='crosshair';	
 		
+		// prepare background image
+		if (vars['backgroundImage']) {
+			self.bgImage = vars['backgroundImage'];	
+		} else {
+			self.bgImage = new Image();
+			self.bgImage.src = self.canvas.toDataURL("image/png");
+		}
+
 		// get canvas parent and append div for the tools
 		var parent=self.canvas.parentNode;
 		var toolBarDOM=document.createElement("div");		
+		toolBarDOM.className = 'canvas_toolbar';
 
 		// add colors
 		toolBarHTML="";
 		if(self.toolbar.colors)
 		{
 			toolBarHTML='<div style="clear:both;">&nbsp;</div>';
-			toolBarHTML+='<div style="float:left;">Colors:</div>';
+			toolBarHTML+='<div style="float:left;">Farve:</div>';
 			for(c in self.toolbar['colors'])
 			{
-				toolBarHTML+="<a href=\"#\" class=\"roCanvasColorPicker\" onclick=\"RoCanvasInstances['"+self.id+"'].setColor('"
+				toolBarHTML+="<a id=\"color_" + c +"\" href=\"#\" class=\"roCanvasColorPicker\" onclick=\"RoCanvasInstances['"+self.id+"'].setColor('"
 					+self.toolbar['colors'][c]+"');return false;\" style=\"background:"+self.toolbar['colors'][c]+";\">&nbsp;</a> ";
+				//MarkSelCol(this.id);
 			}
 		}	
 		
@@ -102,23 +122,25 @@ var RoCanvas= function () {
 		if(self.toolbar.sizes)
 		{
 			toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
-			toolBarHTML+='<div style="float:left;">Sizes:</div>';
+			toolBarHTML+='<div style="float:left;">Streg:</div>';
 			for(s in self.toolbar['sizes'])
 			{
 				toolBarHTML+="<a href=\"#\" class=\"roCanvasColorPicker\" onclick=\"RoCanvasInstances['"+self.id+"'].setSize("+self.toolbar['sizes'][s]
 					+");return false;\" style=\"width:"+self.toolbar['sizes'][s]+"px;height:"
-					+self.toolbar['sizes'][s]+"px;margin-left:15px;\">&nbsp;</a>";	
+					+self.toolbar['sizes'][s]+"px;background-color:black;border-radius:"+self.toolbar['sizes'][s]+"px;margin-left:15px;\">&nbsp;</a>";	
 			}
 		}		
 		
 		// add tools
 		if(self.toolbar.tools)
 		{
-			toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
-			toolBarHTML+='<div style="float:left;">Tools:</div>';
-			for (tool in self.toolbar['tools'])
-			{
-				toolBarHTML+="<a href='#' onclick=\"RoCanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+			if (self.toolbar['tools'].length>1) {
+				toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
+				toolBarHTML+='<div style="float:left;">Pen:</div>';
+				for (tool in self.toolbar['tools'])
+				{
+					toolBarHTML+="<a href='#' onclick=\"RoCanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+				}
 			}
 		}
 		
@@ -154,10 +176,17 @@ var RoCanvas= function () {
 			 self.context.lineJoin = self.shape;
 			 self.context.lineWidth = self.lineWidth;	
 		}
-		
+				
+		// draw the background
+		self.context.clearRect(0,0,self.canvas.width,self.canvas.height);
+		self.context.drawImage(self.bgImage,0,0);
+		self.currentBgImage = new Image();
+		self.currentBgImage.src = self.canvas.toDataURL("image/png");
+
 		
 		/* declare mouse actions */
 		
+
 		// on mouse down
 		self.canvas.addEventListener('mousedown', function(e){			
 		  var mouseX = e.pageX - this.offsetLeft;
@@ -179,19 +208,11 @@ var RoCanvas= function () {
 		{
 		    if(self.paint)
 		    {		    	
-				 // clear any rectangles that should be cleared
-			    self.context.clearRect(self.clearRect[0],self.clearRect[1],
-					 self.clearRect[2],self.clearRect[3]);			    
-			    // clear any circles that have to be cleared
-			    // set color to white but remember old color
-			    self.context.strokeStyle=self.context.fillStyle='#ffffff';		    
-			    self.context.beginPath();
-			    self.context.arc(self.clearCircle[0],self.clearCircle[1],self.clearCircle[2],0,Math.PI*2);
-			    self.context.closePath();
-			    self.context.stroke();
-			    self.context.fill();   
-			    self.setColor(self.color);
-					
+
+				// clear canvas to last saved state	
+				self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
+				self.context.drawImage(self.currentBgImage,0,0);
+
 				// draw different shapes				
 				switch(self.drawTool)
 				{
@@ -200,9 +221,6 @@ var RoCanvas= function () {
 						w = e.pageX - this.offsetLeft - self.startX;
 						h = e.pageY - this.offsetTop - self.startY;
 												
-						// insert postions for clearing			
-						self.clearRect=[self.startX, self.startY, w, h];
-						
 						if(self.drawTool=='rectangle')
 						{
 							self.context.strokeRect(self.startX, self.startY, w, h);			
@@ -218,33 +236,24 @@ var RoCanvas= function () {
 			            h = Math.abs(e.pageY - this.offsetTop - self.startY);
 			               
 			            // r is the bigger of h and w
-			            r = h>w?h:w;
-			            
-			            // remember to clear it								            
-			            self.clearCircle=[self.startX, self.startY, r];
-			            
-			            self.context.beginPath();
-			            // draw from the center
-			            self.context.arc(self.startX,self.startY,r,0,Math.PI*2);
+			            r = h>w?h:w;			            
+			            self.context.beginPath();			            
+			            self.context.arc(self.startX,self.startY,r,0,Math.PI*2);// draw from the center
 			            self.context.closePath();
 			            
 			            if(self.drawTool=='circle') 
-			            {
-			            	// fill with white, then stroke
-			            	var oldColor=self.color;			            	
-			            	self.setColor("#FFFFFF");
-			            	self.context.fill();
-			            	
-			            	self.setColor(oldColor);
+			            {			            
 			            	self.context.stroke();
 			            }            
-			            else self.context.fill();
+			            else
+			            {
+			             	self.context.fill();	
+			            }
 			        break;
 					default:
 						self.addClick(e.pageX - document.getElementById(id).offsetLeft, e.pageY - document.getElementById(id).offsetTop, true);
 					break;
-			}
-		    
+			}		    
 		    self.redraw();
 		  }
 		}, false);
@@ -258,6 +267,12 @@ var RoCanvas= function () {
 		  self.clickDrag = new Array();
 		  self.clearRect=[0,0,0,0];
 		  self.clearCircle=[0,0,0]; 	 	
+
+		  //TODO: update undoStack / redoStack
+
+		  //update the current background 		  
+		  self.currentBgImage.src = self.canvas.toDataURL("image/png");		  
+
 		}, false);
 		
 		this.canvas.addEventListener('mouseleave', function(e){
@@ -281,27 +296,26 @@ var RoCanvas= function () {
 	      self.context.moveTo(self.clickX[i-1], self.clickY[i-1]);
 	     }else{	     	
 	       self.context.moveTo(self.clickX[i]-1, self.clickY[i]);
-	     }
-	     
+	     }	     
 	     self.context.lineTo(self.clickX[i], self.clickY[i]);
 	     self.context.closePath();	     
 	     self.context.stroke();
 	  }
 	};
 	
-	// blank the entire canvas
+	// blank the entire canvas and redraw background
 	this.clearCanvas = function()
 	{
 		oldLineWidth=self.context.lineWidth;	
 		self.context.clearRect(0,0,self.canvas.width,self.canvas.height);
-	   self.canvas.width = self.canvas.width;
-	    
-	   self.clickX = new Array();
-	   self.clickY = new Array();
-	   RoCanvas.clickDrag = new Array();
-	   self.setSize(oldLineWidth);
-	   self.context.lineJoin = self.shape;
-	   self.setColor(self.color);
+	   	self.canvas.width = self.canvas.width;	    
+	   	self.clickX = new Array();
+	   	self.clickY = new Array();
+	   	RoCanvas.clickDrag = new Array();
+	   	self.setSize(oldLineWidth);
+	   	self.context.lineJoin = self.shape;
+	   	self.setColor(self.color);
+		self.context.drawImage(self.bgImage,0,0);
 	};
 	
 	// sets the size of the drawing line in pixels
@@ -348,7 +362,7 @@ var RoCanvas= function () {
 	
 	// serialize the drawing board data
 	this.serialize = function() {
-		var strImageData = this.canvas.toDataURL();
+		var strImageData = this.canvas.toDataURL("image/png");
 		return strImageData;  
 	}
 }
