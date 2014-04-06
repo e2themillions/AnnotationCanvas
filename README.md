@@ -1,6 +1,11 @@
 Annotation Canvas
------------------
-# a js lib for drawing on images...
+=================
+## a js lib for drawing on images...
+
+# TODO:
+- undo/redo functionality (in progress)
+- more drawing tools (arrow, textbox)
+- jquery package
 
 ## What is Annotation Canvas
 A small and easy to embed js class for enabling users to annotate images.. 
