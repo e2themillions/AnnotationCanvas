@@ -1,0 +1,69 @@
+#annocanvas01 {
+  div.ColorPicker, 
+  div.SizePicker,
+  div.tools {
+    clear:both;
+    padding-top:25px;
+  }
+  div.SizePicker a {
+    display:inline-block;
+    text-decoration: none;
+    margin-top:10px;
+  }
+    .canvas_canvas {
+    	float:left;
+    	border:solid 1px black;
+    	margin:10px;  	
+      height:427px;
+      width:480px; /* down-scaling hi-res 1188/891 image */
+
+    }
+     .canvas_toolbar {
+      float:left;
+      border:solid 1px black;
+      margin:10px;    
+     
+
+    }
+
+   .canvas_toolbar {
+  	  padding:10px;
+  	}
+
+  .ColorPicker a
+  {
+      border:1px solid black;    
+      text-decoration:none;
+      display:block;
+      float:left;
+      width:25px;
+      height:25px;
+      margin-left:3px;
+  }
+
+  .tools  a,
+  .SizePicker a,
+  .ColorPicker  a {
+    border:2px solid white;
+  }
+
+  .tools > a.selected,
+  .SizePicker > a.selected,
+  .ColorPicker > a.selected {
+    border:2px solid silver;
+  }
+  .SizePicker a div {
+    height:20px;
+    width:20px;
+    padding:1px;
+    margin:10px;
+  }
+  div.SizePicker{
+  margin-top:10px;
+
+  }
+  div.SizePicker > div {
+    display:inline-block;
+    margin-bottom:10px;
+  }
+}
