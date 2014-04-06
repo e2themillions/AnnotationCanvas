@@ -2,11 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Sample of Using RoCanvas.js</title>  
+  <title>Sample of Using annocanvas.js</title>  
 
  
   <style>
-  .canvas_canvas, .canvas_toolbar {
+#annocanvas01 div.ColorPicker, 
+#annocanvas01 div.SizePicker,
+#annocanvas01 div.tools {
+  clear:both;
+  padding-top:25px;
+}
+#annocanvas01 div.SizePicker a {
+  display:inline-block;
+  text-decoration: none;
+  margin-top:10px;
+}
+ #annocanvas01  .canvas_canvas {
   	float:left;
   	border:solid 1px black;
   	margin:10px;  	
@@ -14,10 +25,19 @@
     width:480px; /* down-scaling hi-res 1188/891 image */
 
   }
-  .canvas_toolbar {
+  #annocanvas01  .canvas_toolbar {
+    float:left;
+    border:solid 1px black;
+    margin:10px;    
+   
+
+  }
+
+ #annocanvas01 .canvas_toolbar {
 	  padding:10px;
 	}
-  .roCanvasColorPicker
+
+#annocanvas01 .ColorPicker a
 {
     border:1px solid black;    
     text-decoration:none;
@@ -27,12 +47,39 @@
     height:25px;
     margin-left:3px;
 }
+
+#annocanvas01 .tools  a,
+#annocanvas01 .SizePicker a,
+#annocanvas01 .ColorPicker  a {
+  border:2px solid white;
+}
+
+#annocanvas01 .tools > a.selected,
+#annocanvas01 .SizePicker > a.selected,
+#annocanvas01 .ColorPicker > a.selected {
+  border:2px solid silver;
+}
+#annocanvas01 .SizePicker a div {
+  height:20px;
+  width:20px;
+  padding:1px;
+  margin:10px;
+}
+#annocanvas01 div.SizePicker{
+margin-top:10px;
+
+}
+#annocanvas01 div.SizePicker > div {
+  display:inline-block;
+  margin-bottom:10px;
+}
+
   </style>
 
 </head>
 <body onload="initDrawstuff()">
 	
-	<div id="rodiv2" style="float:left;">
+	<div id="annocanvas01" style="float:left;">
 		<canvas id="tegneCanvas" width="960" height="854" class="canvas_canvas">
 			Beklager, din browser (det program du bruger til at se hjemmesider med) understøtter desværre ikke 
 			tegnefunktionen. Det anbefales, at du opdaterer dit program til en nyere version som understøtter HTML5.
@@ -63,7 +110,7 @@
 				"toolbar": {
 				   colors: ["#FFF","#000","#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF"],
 				   custom_color: false,
-					tools: ['path', 'circle', 'rectangle'],
+					tools: ['path', 'circle', 'rectangle', 'arrow', 'textbox'],
 					sizes: [3,6,10],		
 					clearButton : {"text":"Nulstil"},	
 					saveButton: null

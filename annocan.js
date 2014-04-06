@@ -7,7 +7,7 @@
 **/
 
 // rocanvas instances
-var RoCanvasInstances = {};
+var CanvasInstances = {};
 
 var RoCanvas= function () {	
 	// internal vars
@@ -20,6 +20,10 @@ var RoCanvas= function () {
 	this.clickDrag = [];
 	this.paint = false;
 	this.context = {};
+	this.undoStack = [];
+	this.redoStack = [];
+	this.undoButtonID;
+	this.redoButtonID;
 	
 	// changeable defaults
 	this.shape = "round";	
@@ -40,7 +44,9 @@ var RoCanvas= function () {
 		sizes: [2, 5, 10, 25],
 		tools: ["path","rectangle","filledrectangle","circle","filledcircle"],
 		clearButton: {"text": "Clear Canvas"},
-		saveButton: null
+		saveButton: null,
+		undoButton: {"text":"undo"},
+		redoButton: {"text":"redo"}
 	};
 	
 	var self = this;
@@ -57,9 +63,11 @@ var RoCanvas= function () {
 	// - hardOffsetY: if needed a hard offset can be set
 	this.RO = function(id, vars) {		
 		self.id = id;
-		
+		self.undoButtonID = "btnUndo_" + id;
+		self.redoButtonID = "btnRedo_" + id;
+
 		// add to instances
-		RoCanvasInstances[id] = self;
+		CanvasInstances[id] = self;
 		
 		// this file location folder
 		self.fileLocation();		
@@ -121,56 +129,62 @@ var RoCanvas= function () {
 		toolBarHTML="";
 		if(self.toolbar.colors)
 		{
-			toolBarHTML='<div style="clear:both;">&nbsp;</div>';
+			toolBarHTML+='<div class="ColorPicker">';
 			toolBarHTML+='<div style="float:left;">Farve:</div>';
 			for(c in self.toolbar['colors'])
 			{
-				toolBarHTML+="<a id=\"color_" + c +"\" href=\"#\" class=\"roCanvasColorPicker\" onclick=\"RoCanvasInstances['"+self.id+"'].setColor('"
+				toolBarHTML+="<a id=\"color_" + c +"\" href=\"#\" class=\"ColorPicker\" onclick=\"CanvasInstances['"+self.id+"'].setColor('"
 					+self.toolbar['colors'][c]+"');return false;\" style=\"background:"+self.toolbar['colors'][c]+";\">&nbsp;</a> ";
 				//MarkSelCol(this.id);
 			}
+			toolBarHTML+='</div>';
 		}	
 		
 		// custom color choice?
 		if(self.toolbar.custom_color) {
-			toolBarHTML += "&nbsp; Custom:&nbsp;<a href=\"#\" class=\"roCanvasColorPicker\" style=\"background:white;\" onclick=\"RoCanvasInstances['"+self.id+"'].setColor(this.style.background);return false;\" id='customColorChoice"+ self.id +"'>&nbsp;</a> #<input type='text' size='6' maxlength='6' onkeyup=\"RoCanvasInstances['"+self.id+"'].customColor(this.value);\">";
+			toolBarHTML+='<div class="CustomColorPicker">';
+			toolBarHTML += "&nbsp; Custom:&nbsp;<a href=\"#\" style=\"background:white;\" onclick=\"CanvasInstances['"+self.id+"'].setColor(this.style.background);return false;\" id='customColorChoice"+ self.id +"'>&nbsp;</a> #<input type='text' size='6' maxlength='6' onkeyup=\"CanvasInstances['"+self.id+"'].customColor(this.value);\">";
+			toolBarHTML+='</div>';
 		}	
 			
 		// add sizes
 		if(self.toolbar.sizes)
 		{
-			toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
-			toolBarHTML+='<div style="float:left;">Streg:</div>';
+			toolBarHTML+='<div class="SizePicker">';
+			toolBarHTML+='<div>Streg:</div>';
 			for(s in self.toolbar['sizes'])
 			{
-				toolBarHTML+="<a href=\"#\" class=\"roCanvasColorPicker\" onclick=\"RoCanvasInstances['"+self.id+"'].setSize("+self.toolbar['sizes'][s]
-					+");return false;\" style=\"width:"+self.toolbar['sizes'][s]+"px;height:"
-					+self.toolbar['sizes'][s]+"px;background-color:black;border-radius:"+self.toolbar['sizes'][s]+"px;margin-left:15px;\">&nbsp;</a>";	
+				toolBarHTML+="<a href=\"#\" id='size_"+self.toolbar['sizes'][s]+"_"+self.id+"'  onclick=\"CanvasInstances['"+self.id+"'].setSize("+self.toolbar['sizes'][s]
+					+");return false;\"><div style=\"width:"+self.toolbar['sizes'][s]+"px;height:"
+					+self.toolbar['sizes'][s]+"px;background-color:black;border-radius:"+self.toolbar['sizes'][s]+"px;margin-left:15px;\">&nbsp;</div></a>";	
 			}
+			toolBarHTML+='</div>';
 		}		
 		
 		// add tools
 		if(self.toolbar.tools)
 		{
 			if (self.toolbar['tools'].length>1) {
-				toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
+				toolBarHTML+='<div class="tools">';
 				toolBarHTML+='<div style="float:left;">Pen:</div>';
 				for (tool in self.toolbar['tools'])
 				{
-					toolBarHTML+="<a href='#' onclick=\"RoCanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+					var xID = "lnkTool_" + self.id + '_' +self.toolbar['tools'][tool];
+					toolBarHTML+="<a id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
 				}
+				toolBarHTML+='</div>';
 			}
 		}
 		
 		// add buttons
 		if(self.toolbar.clearButton || self.toolbar.saveButton)
 		{
-			toolBarHTML+='<div style="clear:both;">&nbsp;</div>';
+			toolBarHTML+='<div class="buttons_'+this.id+'" style="clear:both;">&nbsp;</div>';
 			toolBarHTML+="<p>";
 			
 			if(self.toolbar.clearButton)
 			{
-				toolBarHTML+='<input type="button" value="'+self.toolbar.clearButton.text+'"' + " onclick=\"RoCanvasInstances['"+self.id+"'].clearCanvas();\">";
+				toolBarHTML+='<input type="button" value="'+self.toolbar.clearButton.text+'"' + " onclick=\"CanvasInstances['"+self.id+"'].clearCanvas();\">";
 			}			
 			
 			if(self.toolbar.saveButton)
@@ -179,6 +193,14 @@ var RoCanvas= function () {
 				if(self.toolbar.saveButton.callback) saveButtonCallback=' onclick="'+ self.toolbar.saveButton.callback + '(this);"';
 				toolBarHTML+='<input type="button" id="RoCanvasSave_'+ this.id +'" value="'+self.toolbar.saveButton.text+'"'+saveButtonCallback+'>';
 			}			
+			if(self.toolbar.undoButton) 
+			{
+				toolBarHTML+='<input type="button" id="'+self.undoButtonID+'" disabled value="'+self.toolbar.undoButton.text+'"' + " onclick=\"CanvasInstances['"+self.id+"'].undo();\">";
+			}
+			if(self.toolbar.redoButton) 
+			{
+				toolBarHTML+='<input type="button" id="'+self.redoButtonID+'" disabled value="'+self.toolbar.redoButton.text+'"' + " onclick=\"CanvasInstances['"+self.id+"'].redo();\">";
+			}
 			toolBarHTML+="</p>";
 		}
 		
@@ -203,6 +225,11 @@ var RoCanvas= function () {
 		self.currentBgImage.src = self.canvas.toDataURL("image/jpeg");
 
 		
+		// mark selected tool
+		self.setTool(self.drawTool);
+		self.setSize(self.context.lineWidth);
+		self.setColor(self.context.strokeStyle);
+
 		/* declare mouse actions */
 		
 
@@ -331,6 +358,7 @@ var RoCanvas= function () {
 	// blank the entire canvas and redraw background
 	this.clearCanvas = function()
 	{
+
 		oldLineWidth=self.context.lineWidth;	
 		self.context.clearRect(0,0,self.canvas.width,self.canvas.height);
 	   	self.canvas.width = self.canvas.width;	    
@@ -346,38 +374,74 @@ var RoCanvas= function () {
 		self.updateCurrentState();
 	};
 
-	// updates the current state snapshot
-
+	// updates undo/redo stacks
 	this.updateCurrentState = function() {
-		//TODO: implement stacks for undo / redo
-		self.undoState = self.currentBgImage.src;
+		self.undoStack.push(self.currentBgImage.src);		
+		self.redoStack = [];
+		self.currentBgImage.src = self.canvas.toDataURL("image/jpeg");	
+		if (document.getElementById(self.redoButtonID)) document.getElementById(self.redoButtonID).disabled = true;
+		if (document.getElementById(self.undoButtonID)) document.getElementById(self.undoButtonID).disabled = false;
 		
-		//update the current background 		  
-		self.currentBgImage.src = self.canvas.toDataURL("image/jpeg");			
 	}
 
 	this.undo = function() {
-		// clear canvas to previous saved state	
-		var tmp = self.undoState;
-		self.undoState = self.currentBgImage.src;
-		self.currentBgImage.src = tmp;
-
+		if (self.undoStack.length<1) return false;
+		self.redoStack.push(self.currentBgImage.src);
+		self.currentBgImage.src = self.undoStack.pop();
 		
 		self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
 		self.context.drawImage(self.currentBgImage,0,0);
+
+		if (document.getElementById(self.redoButtonID)) document.getElementById(self.redoButtonID).disabled = self.redoStack.length<1;
+		if (document.getElementById(self.undoButtonID)) document.getElementById(self.undoButtonID).disabled = self.undoStack.length<1;
+		return true;
+	}
+
+	this.redo = function() {
+		if (self.redoStack.length<1) return false;
+		self.undoStack.push(self.currentBgImage.src);
+		self.currentBgImage.src = self.redoStack.pop();
 		
+		self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
+		self.context.drawImage(self.currentBgImage,0,0);
+
+		if (document.getElementById(self.redoButtonID)) document.getElementById(self.redoButtonID).disabled = self.redoStack.length<1;
+		if (document.getElementById(self.undoButtonID)) document.getElementById(self.undoButtonID).disabled = self.undoStack.length<1;
+		return true;
 	}
 	
 	// sets the size of the drawing line in pixels
 	this.setSize = function(px)
 	{
 	    self.context.lineWidth=px;
+	    for(s in self.toolbar['sizes'])
+		{
+			var xID="size_" + self.toolbar['sizes'][s] + "_" + self.id;
+			if (document.getElementById(xID)) {
+				if (self.toolbar['sizes'][s] === px) {
+					document.getElementById(xID).className = 'selected';
+				} else {
+					document.getElementById(xID).className = '';	
+				}
+			}
+		}
 	};
 
 	// sets the tool to draw
 	this.setTool = function(tool)
 	{
 		self.drawTool=tool;	
+		for (itool in self.toolbar['tools'])
+		{
+			var xID = "lnkTool_" + self.id + '_' +self.toolbar['tools'][itool];
+			if (document.getElementById(xID)) {
+				if (self.toolbar['tools'][itool] === tool) {
+					document.getElementById(xID).className = 'selected';
+				} else {
+					document.getElementById(xID).className = '';	
+				}
+			}
+		}
 	};
 	
 	this.setColor = function setColor(col)
@@ -385,6 +449,19 @@ var RoCanvas= function () {
 	   self.context.strokeStyle = col;
 		self.context.fillStyle = col;
 		self.color=col;
+
+		for(c in self.toolbar['colors'])
+		{
+			//console.log(self.toolbar['colors'][c] + "==" + col.toUpperCase());
+			var xID="color_" + c;
+			if (document.getElementById(xID)) {
+				if (self.toolbar['colors'][c].toUpperCase() == col.toUpperCase()) {
+					document.getElementById(xID).className = 'selected';
+				} else {
+					document.getElementById(xID).className = '';	
+				}
+			}
+		}
 	};
 	
 	// finds the location of this file
