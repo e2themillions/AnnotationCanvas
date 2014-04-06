@@ -1,14 +1,9 @@
-/* RoCanvas.js version 1.4.0
-* Converts any canvas object into a RoCanvas HTML 5 Drawing board
-* Adds tools, shapes, color and size selection, etc
-* Full documentation at http://re.trotoys.com/article/rocanvas/ 
+/* AnnotationCanvas v.1.0 (forked from RoCanvas.js version 1.4.0)
 *
+*  OPEN SOURCE
+*  License: BSD
+*  Source code: https://github.com/e2themillions/AnnotationCanvas
 *
-* Modified by Emil:
-* - added optional background image
-* - fixed flickering bug when drawing shapes
-* - made non-filled objects non-filled (instead of white-filled)
-* 
 **/
 
 // rocanvas instances
@@ -34,6 +29,9 @@ var RoCanvas= function () {
 	this.lineWidth = 5;
 	this.bgImage = null; //this is the initial background image
 	this.currentBgImage = null; //this is the current background updated on mouse-up events..
+	this.factor = 1.0; //To account for CSS scaling
+	this.hardOffsetX = 0;
+	this.hardOffsetY = 0;
 	
 	// toolbar
 	this.toolbar = {
@@ -50,7 +48,13 @@ var RoCanvas= function () {
 	
 	// the "constructor" that actually takes a div and converts it into RoCanvas
 	// @param id string, the DOM ID of the div
-	// @param vars - optionally pass custom vars, toolbar, backgroundImage etc  
+	// @param vars - optionally pass custom vars.
+	// - toolbar
+	// - settings
+	// - backgroundImage: a js Image object to use as background
+	// - cssScale: if css has been used to resize the canvas (have a visually small canvas-object while keeping the canvas-drawing hi-res for instance) a scaling factor can be supplied
+	// - hardOffsetX: if needed a hard offset can be set
+	// - hardOffsetY: if needed a hard offset can be set
 	this.RO = function(id, vars) {		
 		self.id = id;
 		
@@ -91,7 +95,21 @@ var RoCanvas= function () {
 			self.bgImage = vars['backgroundImage'];	
 		} else {
 			self.bgImage = new Image();
-			self.bgImage.src = self.canvas.toDataURL("image/png");
+			self.bgImage.src = self.canvas.toDataURL("image/jpeg");
+		}
+
+		// set scaling (e.g. if canvas has been scaled up or down by CSS).
+		// We use this scaling method instead of context.scale() or .drawImage() with scaling, because we want to preseve the
+		// original scale of the background image..
+		if (vars['cssScale']) {
+			self.factor = vars['cssScale'];
+		}
+
+		if (vars['hardOffsetY']) {
+			self.hardOffsetY = vars['hardOffsetY'];
+		}
+		if (vars['hardOffsetX']) {
+			self.hardOffsetX = vars['hardOffsetX'];
 		}
 
 		// get canvas parent and append div for the tools
@@ -170,6 +188,7 @@ var RoCanvas= function () {
 		// Check the element is in the DOM and the browser supports canvas
 		if(self.canvas.getContext) 
 		{
+
 			 // Initaliase a 2-dimensional drawing context
 			 self.context = self.canvas.getContext('2d');			 
 			 self.context.strokeStyle = self.color;
@@ -181,7 +200,7 @@ var RoCanvas= function () {
 		self.context.clearRect(0,0,self.canvas.width,self.canvas.height);
 		self.context.drawImage(self.bgImage,0,0);
 		self.currentBgImage = new Image();
-		self.currentBgImage.src = self.canvas.toDataURL("image/png");
+		self.currentBgImage.src = self.canvas.toDataURL("image/jpeg");
 
 		
 		/* declare mouse actions */
@@ -189,11 +208,14 @@ var RoCanvas= function () {
 
 		// on mouse down
 		self.canvas.addEventListener('mousedown', function(e){			
-		  var mouseX = e.pageX - this.offsetLeft;
+		  var mouseX = (e.pageX - this.offsetLeft - self.hardOffsetX)*self.factor;
 		  self.startX=mouseX;
-		  var mouseY = e.pageY - this.offsetTop;		  
+		  var mouseY = (e.pageY - this.offsetTop - self.hardOffsetY)*self.factor;		  
 		  self.startY=mouseY;
-				
+		
+		  
+		  
+		  
 		  self.paint = true;	
 		  
 		  if(self.drawTool=='path')
@@ -213,13 +235,16 @@ var RoCanvas= function () {
 				self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
 				self.context.drawImage(self.currentBgImage,0,0);
 
+				var pgY = (e.pageY - this.offsetTop - self.hardOffsetY)*self.factor;
+				var pgX = (e.pageX - this.offsetLeft - self.hardOffsetX)*self.factor;
+
 				// draw different shapes				
 				switch(self.drawTool)
 				{
 					case 'rectangle':		
 					case 'filledrectangle':		
-						w = e.pageX - this.offsetLeft - self.startX;
-						h = e.pageY - this.offsetTop - self.startY;
+						w = pgX - self.startX;
+						h = pgY - self.startY;
 												
 						if(self.drawTool=='rectangle')
 						{
@@ -232,8 +257,8 @@ var RoCanvas= function () {
 					break;
 			        case 'circle':
 			        case 'filledcircle':
-			            w = Math.abs(e.pageX - this.offsetLeft - self.startX);
-			            h = Math.abs(e.pageY - this.offsetTop - self.startY);
+			            w = Math.abs(pgX - self.startX);
+			            h = Math.abs(pgY - self.startY);
 			               
 			            // r is the bigger of h and w
 			            r = h>w?h:w;			            
@@ -251,7 +276,7 @@ var RoCanvas= function () {
 			            }
 			        break;
 					default:
-						self.addClick(e.pageX - document.getElementById(id).offsetLeft, e.pageY - document.getElementById(id).offsetTop, true);
+						self.addClick(pgX, pgY, true);
 					break;
 			}		    
 		    self.redraw();
@@ -268,10 +293,10 @@ var RoCanvas= function () {
 		  self.clearRect=[0,0,0,0];
 		  self.clearCircle=[0,0,0]; 	 	
 
-		  //TODO: update undoStack / redoStack
+		  
 
-		  //update the current background 		  
-		  self.currentBgImage.src = self.canvas.toDataURL("image/png");		  
+		  //update the current background state
+		  self.updateCurrentState();
 
 		}, false);
 		
@@ -316,7 +341,32 @@ var RoCanvas= function () {
 	   	self.context.lineJoin = self.shape;
 	   	self.setColor(self.color);
 		self.context.drawImage(self.bgImage,0,0);
+		
+		//update the current background 		  
+		self.updateCurrentState();
 	};
+
+	// updates the current state snapshot
+
+	this.updateCurrentState = function() {
+		//TODO: implement stacks for undo / redo
+		self.undoState = self.currentBgImage.src;
+		
+		//update the current background 		  
+		self.currentBgImage.src = self.canvas.toDataURL("image/jpeg");			
+	}
+
+	this.undo = function() {
+		// clear canvas to previous saved state	
+		var tmp = self.undoState;
+		self.undoState = self.currentBgImage.src;
+		self.currentBgImage.src = tmp;
+
+		
+		self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
+		self.context.drawImage(self.currentBgImage,0,0);
+		
+	}
 	
 	// sets the size of the drawing line in pixels
 	this.setSize = function(px)
@@ -344,12 +394,12 @@ var RoCanvas= function () {
 		var scripts = document.getElementsByTagName('script');
 		for(i=0; i<scripts.length;i++)
 		{
-			if(scripts[i].src && scripts[i].src.indexOf("rocanvas.js">0))
+			if(scripts[i].src && scripts[i].src.indexOf("annocan.js">0))
 			{
 				path=scripts[i].src;
 			}
 		}		
-		path=path.replace(/rocanvas\.js.*$/, '');
+		path=path.replace(/annocan\.js.*$/, '');
 		
 		self.filepath=path;
 	}; 
@@ -362,7 +412,7 @@ var RoCanvas= function () {
 	
 	// serialize the drawing board data
 	this.serialize = function() {
-		var strImageData = this.canvas.toDataURL("image/png");
+		var strImageData = this.canvas.toDataURL("image/jpeg");
 		return strImageData;  
 	}
 }
