@@ -36,7 +36,7 @@ var RoCanvas= function () {
 	this.factor = 1.0; //To account for CSS scaling
 	this.hardOffsetX = 0;
 	this.hardOffsetY = 0;
-	this.arrowHeadSize = 20; // length of arrow head in pixels
+	this.arrowHeadSize = 30; // length of arrow head in pixels
 	this.hardFileLocation = '';
 	
 	// toolbar
@@ -142,8 +142,14 @@ var RoCanvas= function () {
 			toolBarHTML+='<div style="float:left;">Farve:</div>';
 			for(c in self.toolbar['colors'])
 			{
+				var xClrBg = '';
+
+				if (self.toolbar['colors'][c]=="WHITE"||self.toolbar['colors'][c]=="#FFF"||self.toolbar['colors'][c]=="#FFFFFF") {
+					console.log(self.toolbar['colors'][c]);
+					xClrBg = ' url('+self.filepath+'img/white_color.png) no-repeat 0 0;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;';
+				}
 				toolBarHTML+="<a id=\"color_" + c +"\" href=\"#\" class=\"ColorPicker\" onclick=\"CanvasInstances['"+self.id+"'].setColor('"
-					+self.toolbar['colors'][c]+"');return false;\" style=\"background:"+self.toolbar['colors'][c]+";\">&nbsp;</a> ";
+					+self.toolbar['colors'][c]+"');return false;\" style=\"background:"+self.toolbar['colors'][c]+xClrBg+";\">&nbsp;</a> ";
 				//MarkSelCol(this.id);
 			}
 			toolBarHTML+='</div>';
@@ -179,7 +185,7 @@ var RoCanvas= function () {
 				for (tool in self.toolbar['tools'])
 				{
 					var xID = "lnkTool_" + self.id + '_' +self.toolbar['tools'][tool];
-					toolBarHTML+="<a style='float:left' id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+					toolBarHTML+="<a style='float:left' id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
 				}
 				toolBarHTML+='</div>';
 			}
@@ -279,7 +285,6 @@ var RoCanvas= function () {
 				{
 					case 'rectangle':		
 					case 'filledrectangle':		
-					case 'textbox':		
 						w = pgX - self.startX;
 						h = pgY - self.startY;
 												
@@ -315,6 +320,8 @@ var RoCanvas= function () {
 			        case 'arrow':
 			        	canvas_arrow(self.startX,self.startY,pgX,pgY);
 			        	break;
+					case 'textbox':		
+						break; //text box is handled on mouseUp...
 					default:
 						self.addClick(pgX, pgY, true);
 						break;
@@ -341,12 +348,10 @@ var RoCanvas= function () {
 					//show popup asking for the text..
 					var userInput = prompt("Text", "");
 					self.context.beginPath();			            
-					var tmpStyle = self.context.fillStyle;
-					self.context.fillStyle = "black";
 					self.context.font = "34pt Arial";
-					self.context.fillText(userInput, self.startX+10, self.startY+50);
+					self.context.fillText(userInput, self.startX, self.startY+50);
 					self.context.closePath();			
-					self.context.fillStyle = tmpStyle;
+
 					break;
 				default:
 					break;
