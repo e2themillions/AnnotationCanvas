@@ -37,6 +37,7 @@ var RoCanvas= function () {
 	this.hardOffsetX = 0;
 	this.hardOffsetY = 0;
 	this.arrowHeadSize = 20; // length of arrow head in pixels
+	this.hardFileLocation = '';
 	
 	// toolbar
 	this.toolbar = {
@@ -94,7 +95,8 @@ var RoCanvas= function () {
 					|| key=='color' 
 					|| key=='tool' 
 					|| key=='lineWidth'
-					|| key=='arrowHeadSize')) continue;				
+					|| key=='arrowHeadSize'
+					|| key=='hardFileLocation')) continue;				
 					console.log("Setting:" + key);
 				self[key]=vars['settings'][key];
 			}
@@ -176,7 +178,7 @@ var RoCanvas= function () {
 				for (tool in self.toolbar['tools'])
 				{
 					var xID = "lnkTool_" + self.id + '_' +self.toolbar['tools'][tool];
-					toolBarHTML+="<a id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+					toolBarHTML+="<a style='float:left' id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"/img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
 				}
 				toolBarHTML+='</div>';
 			}
@@ -514,6 +516,10 @@ var RoCanvas= function () {
 	// required to render proper include path for images	
 	this.fileLocation = function()
 	{
+		if (self.hardFileLocation!='') {
+			self.filepath = self.hardFileLocation;
+			return;
+		} 
 		var scripts = document.getElementsByTagName('script');
 		for(i=0; i<scripts.length;i++)
 		{
