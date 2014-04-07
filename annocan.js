@@ -71,9 +71,7 @@ var RoCanvas= function () {
 		// add to instances
 		CanvasInstances[id] = self;
 		
-		// this file location folder
-		self.fileLocation();		
-		
+	
 		// if settings or tools are passed overwrite them
 		vars = vars||{};		
 		
@@ -101,6 +99,9 @@ var RoCanvas= function () {
 				self[key]=vars['settings'][key];
 			}
 		}	
+
+		// this file location folder
+		self.fileLocation();		
 		
 		// prepare canvas		
 		self.canvas = document.getElementById(id);			
@@ -278,6 +279,7 @@ var RoCanvas= function () {
 				{
 					case 'rectangle':		
 					case 'filledrectangle':		
+					case 'textbox':		
 						w = pgX - self.startX;
 						h = pgY - self.startY;
 												
@@ -311,12 +313,7 @@ var RoCanvas= function () {
 			            }
 			        	break;
 			        case 'arrow':
-			        	//TODO: implement arrow polygon
-			        	//draw arrow with start in self.startX/Y and end in pgX/Y
 			        	canvas_arrow(self.startX,self.startY,pgX,pgY);
-			        	break;
-			        case 'textbox':
-			        	//TODO: implement textbox
 			        	break;
 					default:
 						self.addClick(pgX, pgY, true);
@@ -328,19 +325,35 @@ var RoCanvas= function () {
 		
 		// when mouse is released
 		self.canvas.addEventListener('mouseup', function(e){
-		  self.paint = false;
+
+			self.paint = false;
 		  
-		  self.clickX = new Array();
-		  self.clickY = new Array();
-		  self.clickDrag = new Array();
-		  self.clearRect=[0,0,0,0];
-		  self.clearCircle=[0,0,0]; 	 	
+			self.clickX = new Array();
+			self.clickY = new Array();
+			self.clickDrag = new Array();
+			self.clearRect=[0,0,0,0];
+			self.clearCircle=[0,0,0]; 	 	
 
-		  
 
-		  //update the current background state
-		  self.updateCurrentState();
+			// any tool relevant post processing?
+			switch (self.drawTool) {
+				case 'textbox':
+					//show popup asking for the text..
+					var userInput = prompt("Text", "");
+					self.context.beginPath();			            
+					var tmpStyle = self.context.fillStyle;
+					self.context.fillStyle = "black";
+					self.context.font = "34pt Arial";
+					self.context.fillText(userInput, self.startX+10, self.startY+50);
+					self.context.closePath();			
+					self.context.fillStyle = tmpStyle;
+					break;
+				default:
+					break;
+			}
 
+			//update the current background state
+		 	self.updateCurrentState();
 		}, false);
 		
 		this.canvas.addEventListener('mouseleave', function(e){
