@@ -36,13 +36,14 @@ var RoCanvas= function () {
 	this.factor = 1.0; //To account for CSS scaling
 	this.hardOffsetX = 0;
 	this.hardOffsetY = 0;
+	this.arrowHeadSize = 20; // length of arrow head in pixels
 	
 	// toolbar
 	this.toolbar = {
 		colors: ["#FFF","#000","#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF"],
 		custom_color: true,
 		sizes: [2, 5, 10, 25],
-		tools: ["path","rectangle","filledrectangle","circle","filledcircle"],
+		tools: ["path","rectangle","filledrectangle","circle","filledcircle","arrow","textbox"],
 		clearButton: {"text": "Clear Canvas"},
 		saveButton: null,
 		undoButton: {"text":"undo"},
@@ -89,7 +90,12 @@ var RoCanvas= function () {
 			// allow only shape, color, tool, lineWidth
 			for(var key in vars['settings'])
 			{
-				if(!(key=='shape' || key=='color' || key=='tool' || key=='lineWidth')) continue;				
+				if(!(key=='shape' 
+					|| key=='color' 
+					|| key=='tool' 
+					|| key=='lineWidth'
+					|| key=='arrowHeadSize')) continue;				
+					console.log("Setting:" + key);
 				self[key]=vars['settings'][key];
 			}
 		}	
@@ -226,7 +232,7 @@ var RoCanvas= function () {
 
 		
 		// mark selected tool
-		self.setTool(self.drawTool);
+		self.setTool(self.tool);
 		self.setSize(self.context.lineWidth);
 		self.setColor(self.context.strokeStyle);
 
@@ -281,7 +287,7 @@ var RoCanvas= function () {
 						{				
 							self.context.fillRect(self.startX, self.startY, w, h);			
 						}
-					break;
+						break;
 			        case 'circle':
 			        case 'filledcircle':
 			            w = Math.abs(pgX - self.startX);
@@ -301,10 +307,18 @@ var RoCanvas= function () {
 			            {
 			             	self.context.fill();	
 			            }
-			        break;
+			        	break;
+			        case 'arrow':
+			        	//TODO: implement arrow polygon
+			        	//draw arrow with start in self.startX/Y and end in pgX/Y
+			        	canvas_arrow(self.startX,self.startY,pgX,pgY);
+			        	break;
+			        case 'textbox':
+			        	//TODO: implement textbox
+			        	break;
 					default:
 						self.addClick(pgX, pgY, true);
-					break;
+						break;
 			}		    
 		    self.redraw();
 		  }
@@ -332,6 +346,22 @@ var RoCanvas= function () {
 		}, false);
 	};
 	
+
+	function canvas_arrow(fromx, fromy, tox, toy){
+		var headlen = self.arrowHeadSize;
+		var dx = tox-fromx;
+		var dy = toy-fromy;
+		var angle = Math.atan2(dy,dx);
+		self.context.beginPath();			            
+		self.context.moveTo(fromx, fromy);
+		self.context.lineTo(tox, toy);
+		self.context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+		self.context.moveTo(tox, toy);
+		self.context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+		self.context.stroke();
+		self.context.closePath(); 
+	}
+
 	this.addClick = function(x, y, dragging)
 	{
 	  self.clickX.push(x);
@@ -383,6 +413,14 @@ var RoCanvas= function () {
 		if (document.getElementById(self.undoButtonID)) document.getElementById(self.undoButtonID).disabled = false;
 		
 	}
+
+
+
+	/**
+	/ 
+	/ 'public' functions
+	/
+	/**/
 
 	this.undo = function() {
 		if (self.undoStack.length<1) return false;
@@ -464,6 +502,14 @@ var RoCanvas= function () {
 		}
 	};
 	
+
+
+	/**
+	/ 
+	/ helper functions
+	/
+	/**/
+
 	// finds the location of this file
 	// required to render proper include path for images	
 	this.fileLocation = function()
@@ -493,4 +539,5 @@ var RoCanvas= function () {
 		var strImageData = this.canvas.toDataURL("image/jpeg");
 		return strImageData;  
 	}
+
 }

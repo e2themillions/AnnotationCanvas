@@ -27,11 +27,8 @@
   	function initDrawstuff() {
   		var bkg = new Image();
   		//bkg.src = "xyz.jpg"; //temporary changed to load base64 directly to avoid security errors when running locally
-		bkg.src = getDummy(); //base64 content loaded from dummy_image.js
-		
-
-
-		bkg.addEventListener('load', function(){
+		  bkg.src = getDummy(); //base64 content loaded from dummy_image.js
+		  bkg.addEventListener('load', function(){
 
 			r2=new RoCanvas;
 			r2.RO("annocanvas01_canvas", {
@@ -44,8 +41,9 @@
 					saveButton: null
 				},
 				"settings": {
-					color: 'red',
-					lineWidth : "6"
+					color: 'blue',
+					lineWidth : "6",
+          tool: 'arrow'
 				}, 
 				"backgroundImage" : bkg,
         "cssScale" : 2.0
