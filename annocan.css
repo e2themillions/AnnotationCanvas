@@ -1,11 +1,50 @@
-#annocanvas01 div.ColorPicker,#annocanvas01 div.SizePicker,#annocanvas01 div.tools{clear:both;padding-top:25px}
-#annocanvas01 div.SizePicker a{display:inline-block;text-decoration:none;margin-top:10px}
-#annocanvas01 .canvas_canvas{float:left;border:solid 1px #000;margin:10px;height:427px;width:480px;}
-#annocanvas01 .canvas_toolbar{float:left;border:solid 1px #000;margin:10px}
-#annocanvas01 .canvas_toolbar{padding:10px}
-#annocanvas01 .ColorPicker a{border:1px solid #000;text-decoration:none;display:block;float:left;width:25px;height:25px;margin-left:3px}
-#annocanvas01 .tools a,#annocanvas01 .SizePicker a,#annocanvas01 .ColorPicker a{border:2px solid #fff}
-#annocanvas01 .tools>a.selected,#annocanvas01 .SizePicker>a.selected,#annocanvas01 .ColorPicker>a.selected{border:2px solid #c0c0c0}
-#annocanvas01 .SizePicker a div{height:20px;width:20px;padding:1px;margin:10px}
-#annocanvas01 div.SizePicker{margin-top:10px}
-#annocanvas01 div.SizePicker>div{display:inline-block;margin-bottom:10px}
+#annocanvas01 div.ColorPicker,
+#annocanvas01 div.SizePicker,
+#annocanvas01 div.tools {
+  clear: both;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+#annocanvas01 div.ColorPicker a,
+#annocanvas01 div.SizePicker a,
+#annocanvas01 div.tools a {
+  border: 2px solid white;
+  display: inline-block;
+  text-decoration: none;
+}
+#annocanvas01 div.ColorPicker a.selected,
+#annocanvas01 div.SizePicker a.selected,
+#annocanvas01 div.tools a.selected {
+  border: 2px solid silver;
+}
+#annocanvas01 .canvas_canvas {
+  float: left;
+  border: solid 1px black;
+  margin: 10px;
+  height: 427px;
+  width: 480px;
+  /* down-scaling hi-res 1188/891 image */
+
+}
+#annocanvas01 .canvas_toolbar {
+  float: left;
+  border: solid 1px black;
+  margin: 10px;
+  padding: 10px;
+}
+#annocanvas01 .ColorPicker a {
+  float: left;
+  width: 25px;
+  height: 25px;
+  margin-left: 3px;
+}
+#annocanvas01 .SizePicker a div {
+  height: 20px;
+  width: 20px;
+  padding: 1px;
+  margin: 10px;
+}
+#annocanvas01 div.SizePicker > div {
+  display: inline-block;
+  margin-bottom: 10px;
+}
