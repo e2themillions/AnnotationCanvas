@@ -474,6 +474,7 @@ var RoCanvas= function () {
 			if(scripts[i].src && scripts[i].src.indexOf("annocan.js">0))
 			{
 				path=scripts[i].src;
+				break;
 			}
 		}		
 		path=path.replace(/annocan\.js.*$/, '');
