@@ -44,7 +44,7 @@ var RoCanvas= function () {
 		colors: ["#FFF","#000","#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF"],
 		custom_color: true,
 		sizes: [2, 5, 10, 25],
-		tools: ["path","rectangle","filledrectangle","circle","filledcircle","arrow","textbox"],
+		tools: ["path","rectangle","filledrectangle","circle","filledcircle","ellipse","filledellipse","arrow","textbox"],
 		clearButton: {"text": "Clear Canvas"},
 		saveButton: null,
 		undoButton: {"text":"undo"},
@@ -317,8 +317,14 @@ var RoCanvas= function () {
 			             	self.context.fill();	
 			            }
 			        	break;
+					case "filledellipse":
+			        	self.drawEllipse(self.startX,self.startY,pgX-self.startX,pgY-self.startY,true);
+			        	break;			        	
+			        case "ellipse":
+			        	self.drawEllipse(self.startX,self.startY,pgX-self.startX,pgY-self.startY,false);
+			        	break;
 			        case 'arrow':
-			        	canvas_arrow(self.startX,self.startY,pgX,pgY);
+			        	self.canvas_arrow(self.startX,self.startY,pgX,pgY);
 			        	break;
 					case 'textbox':		
 						break; //text box is handled on mouseUp...
@@ -366,8 +372,36 @@ var RoCanvas= function () {
 		}, false);
 	};
 	
+    this.drawEllipseByCenter = function(cx, cy, w, h) {
+      	drawEllipse(cx - w/2.0, cy - h/2.0, w, h);
+    }
+    
+    this.drawEllipse = function(x, y, w, h, fill) {
+    	var ctx = self.context;
+      	var kappa = .5522848,
+          ox = (w / 2) * kappa, // control point offset horizontal
+          oy = (h / 2) * kappa, // control point offset vertical
+          xe = x + w,           // x-end
+          ye = y + h,           // y-end
+          xm = x + w / 2,       // x-middle
+          ym = y + h / 2;       // y-middle
+    
+      ctx.beginPath();
+      ctx.moveTo(x, ym);
+      ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+      ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+      ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+      ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+      ctx.closePath();
+      if (fill) {
+      	ctx.fill();
+      } else {
+      	ctx.stroke();
+      }
+      ctx.closePath();
+    }
 
-	function canvas_arrow(fromx, fromy, tox, toy){
+	this.canvas_arrow = function(fromx, fromy, tox, toy){
 		var headlen = self.arrowHeadSize;
 		var dx = tox-fromx;
 		var dy = toy-fromy;
