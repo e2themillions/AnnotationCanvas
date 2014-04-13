@@ -4,8 +4,10 @@ Annotation Canvas
 
 # TODO:
 - jquery package
+- visual overhaul (add styling/theme/button images.. make it (even more) attractive to the eye)
 - update sample.html
-- documentation / wiki
+- update documentation / wiki
+
 
 ## What is Annotation Canvas
 A small and easy to embed js class for enabling users to annotate images.. 
