@@ -20,7 +20,11 @@ It is a fork of the excellent RoCanvas.js - see  http://re.trotoys.com/article/r
 ## What makes this Different from RoCanvas.js
 - More drawing tools (arrow, textbox, ellipse)
 - Added possibility of loading a background image
-- Added "hollow" shapes (ie. circles without white fill)
+- Added optional scaling (eg. for loading a large / hi-res image, then scale it down with CSS, but still have the annotations saved in the high resolution)
+- Added truly "hollow" shapes (ie. shapes without white fill)
 - Implemented undo/redo functionality
+- Added visual indicators of selected tool/width/color
+- Added some extra settings (e.g. hard offset X/Y, scaleFactor etc)
+- Added border around #FFF color
 - Fixed some bugs (most notably related to redrawing)
-- Added some extra settings
+
