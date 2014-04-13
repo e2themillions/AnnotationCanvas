@@ -3,9 +3,9 @@ Annotation Canvas
 ## a js lib for drawing on images...
 
 # TODO:
-- undo/redo functionality (in progress)
-- more drawing tools (arrow, textbox)
 - jquery package
+- update sample.html
+- documentation / wiki
 
 ## What is Annotation Canvas
 A small and easy to embed js class for enabling users to annotate images.. 
@@ -16,8 +16,9 @@ It is a fork of the excellent RoCanvas.js - see  http://re.trotoys.com/article/r
 
 
 ## What makes this Different from RoCanvas.js
-
-- Added optional background image
+- More drawing tools (arrow, textbox, ellipse)
+- Added possibility of loading a background image
 - Added "hollow" shapes (ie. circles without white fill)
-- Fixed some bugs
-- Prepared for undo/redo implementation
+- Implemented undo/redo functionality
+- Fixed some bugs (most notably related to redrawing)
+- Added some extra settings
