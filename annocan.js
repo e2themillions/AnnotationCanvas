@@ -185,7 +185,7 @@ var RoCanvas= function () {
 				for (tool in self.toolbar['tools'])
 				{
 					var xID = "lnkTool_" + self.id + '_' +self.toolbar['tools'][tool];
-					toolBarHTML+="<a style='float:left' id='"+xID+"' href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\"><img src=\""+self.filepath+"img/tool-"+self.toolbar['tools'][tool]+".png\" width='25' height='25'></a> ";
+					toolBarHTML+="<span class=\"tool_"+self.toolbar['tools'][tool]+"\"><a id=\""+xID+"\" href='#' onclick=\"CanvasInstances['"+self.id+"'].setTool('"+self.toolbar['tools'][tool]+"');return false;\" title=\""+self.toolbar['tools'][tool]+"\"></a></span>";
 				}
 				toolBarHTML+='</div>';
 			}

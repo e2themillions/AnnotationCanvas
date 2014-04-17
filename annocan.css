@@ -5,6 +5,7 @@
 #annocanvas01 div.tools,
 #tegneCanvas div.tools {
   clear: both;
+  float: left;
   padding-top: 5px;
   margin-top: 5px;
 }
@@ -25,6 +26,118 @@
 #annocanvas01 div.tools a.selected,
 #tegneCanvas div.tools a.selected {
   border: 2px solid silver;
+}
+#annocanvas01 div.tools a,
+#tegneCanvas div.tools a {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  background-image: url(./img/tools-sprite.png);
+  background-repeat: no-repeat;
+}
+#annocanvas01 div.tools span,
+#tegneCanvas div.tools span {
+  display: inline-block;
+}
+#annocanvas01 div.tools span a.selected,
+#tegneCanvas div.tools span a.selected {
+  border: none;
+}
+#annocanvas01 div.tools span.tool_path a,
+#tegneCanvas div.tools span.tool_path a {
+  background-position: 0px 0px;
+}
+#annocanvas01 div.tools span.tool_path a.selected,
+#tegneCanvas div.tools span.tool_path a.selected {
+  background-position: 0px -36px;
+}
+#annocanvas01 div.tools span.tool_rectangle a,
+#tegneCanvas div.tools span.tool_rectangle a {
+  background-position: -36px 0px;
+}
+#annocanvas01 div.tools span.tool_rectangle a.selected,
+#tegneCanvas div.tools span.tool_rectangle a.selected {
+  background-position: -36px -36px;
+}
+#annocanvas01 div.tools span.tool_filledrectangle a,
+#tegneCanvas div.tools span.tool_filledrectangle a {
+  background-position: -72px 0px;
+}
+#annocanvas01 div.tools span.tool_filledrectangle a.selected,
+#tegneCanvas div.tools span.tool_filledrectangle a.selected {
+  background-position: -72px -36px;
+}
+#annocanvas01 div.tools span.tool_circle a,
+#tegneCanvas div.tools span.tool_circle a {
+  background-position: -108px 0px;
+}
+#annocanvas01 div.tools span.tool_circle a.selected,
+#tegneCanvas div.tools span.tool_circle a.selected {
+  background-position: -108px -36px;
+}
+#annocanvas01 div.tools span.tool_filledcircle a,
+#tegneCanvas div.tools span.tool_filledcircle a {
+  background-position: -144px 0px;
+}
+#annocanvas01 div.tools span.tool_filledcircle a.selected,
+#tegneCanvas div.tools span.tool_filledcircle a.selected {
+  background-position: -144px -36px;
+}
+#annocanvas01 div.tools span.tool_ellipse a,
+#tegneCanvas div.tools span.tool_ellipse a {
+  background-position: -180px 0px;
+}
+#annocanvas01 div.tools span.tool_ellipse a.selected,
+#tegneCanvas div.tools span.tool_ellipse a.selected {
+  background-position: -180px -36px;
+}
+#annocanvas01 div.tools span.tool_filledellipse a,
+#tegneCanvas div.tools span.tool_filledellipse a {
+  background-position: -216px 0px;
+}
+#annocanvas01 div.tools span.tool_filledellipse a.selected,
+#tegneCanvas div.tools span.tool_filledellipse a.selected {
+  background-position: -216px -36px;
+}
+#annocanvas01 div.tools span.tool_arrow a,
+#tegneCanvas div.tools span.tool_arrow a {
+  background-position: -252px 0px;
+}
+#annocanvas01 div.tools span.tool_arrow a.selected,
+#tegneCanvas div.tools span.tool_arrow a.selected {
+  background-position: -252px -36px;
+}
+#annocanvas01 div.tools span.tool_textbox a,
+#tegneCanvas div.tools span.tool_textbox a {
+  background-position: -288px 0px;
+}
+#annocanvas01 div.tools span.tool_textbox a.selected,
+#tegneCanvas div.tools span.tool_textbox a.selected {
+  background-position: -288px -36px;
+}
+#annocanvas01 div.tools span.tool_moustache1 a,
+#tegneCanvas div.tools span.tool_moustache1 a {
+  background-position: -324px 0px;
+}
+#annocanvas01 div.tools span.tool_moustache1 a.selected,
+#tegneCanvas div.tools span.tool_moustache1 a.selected {
+  background-position: -324px -36px;
+}
+#annocanvas01 div.tools span.tool_moustache2 a,
+#tegneCanvas div.tools span.tool_moustache2 a {
+  background-position: -360px 0px;
+}
+#annocanvas01 div.tools span.tool_moustache2 a.selected,
+#tegneCanvas div.tools span.tool_moustache2 a.selected {
+  background-position: -360px -36px;
+}
+#annocanvas01 div.tools span.tool_moustache3 a,
+#tegneCanvas div.tools span.tool_moustache3 a {
+  background-position: -396px 0px;
+}
+#annocanvas01 div.tools span.tool_moustache3 a.selected,
+#tegneCanvas div.tools span.tool_moustache3 a.selected {
+  background-position: -396px -36px;
 }
 #annocanvas01 .canvas_canvas,
 #tegneCanvas .canvas_canvas {

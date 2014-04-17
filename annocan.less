@@ -4,6 +4,7 @@
   div.SizePicker,
   div.tools {
     clear:both;
+    float:left;
     padding-top:5px;
     margin-top:5px;
     a {
@@ -16,6 +17,45 @@
     }
   }
 
+  div.tools {
+    a {
+      display:inline-block;
+      width:36px;
+      height:36px;
+      background-image:url(./img/tools-sprite.png);
+      background-repeat:no-repeat;
+    }
+
+
+    /* sprite bg function */
+    .setBkgPos(@X: 0, @Y: 0) {
+      @Xshift: -36px;
+      @Yshift: -36px;
+      background-position: (@Xshift * @X) (@Yshift * @Y);
+    }
+
+    span {
+      display:inline-block;
+      a.selected {border:none;}
+      &.tool_path a {.setBkgPos(0, 0);&.selected{.setBkgPos(0, 1);}}
+      &.tool_rectangle a {.setBkgPos(1, 0);&.selected{.setBkgPos(1, 1);}}
+      &.tool_filledrectangle a {.setBkgPos(2, 0);&.selected{.setBkgPos(2, 1);}}
+      &.tool_circle a {.setBkgPos(3, 0);&.selected{.setBkgPos(3, 1);}}
+      &.tool_filledcircle a {.setBkgPos(4, 0);&.selected{.setBkgPos(4, 1);}}
+      &.tool_ellipse a {.setBkgPos(5, 0);&.selected{.setBkgPos(5, 1);}}
+      &.tool_filledellipse a {.setBkgPos(6, 0);&.selected{.setBkgPos(6, 1);}}
+      &.tool_arrow a {.setBkgPos(7, 0);&.selected{.setBkgPos(7, 1);}}
+      &.tool_textbox a {.setBkgPos(8, 0);&.selected{.setBkgPos(8, 1);}}
+      &.tool_moustache1 a {.setBkgPos(9, 0);&.selected{.setBkgPos(9, 1);}}
+      &.tool_moustache2 a {.setBkgPos(10, 0);&.selected{.setBkgPos(10, 1);}}
+      &.tool_moustache3 a {.setBkgPos(11, 0);&.selected{.setBkgPos(11, 1);}}      
+    }
+
+
+  }
+
+   
+
   .canvas_canvas {
   	float:right;
   	border:solid 1px black;
@@ -24,6 +64,8 @@
     width:480px; /* down-scaling hi-res 1188/891 image */
 
   }
+
+
    .canvas_toolbar {
     float:left;
     border:solid 1px black;
