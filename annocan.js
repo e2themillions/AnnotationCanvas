@@ -44,7 +44,7 @@ var RoCanvas= function () {
 		colors: ["#FFF","#000","#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF"],
 		custom_color: true,
 		sizes: [2, 5, 10, 25],
-		tools: ["path","rectangle","filledrectangle","circle","filledcircle","ellipse","filledellipse","arrow","textbox"],
+		tools: ["path","rectangle","filledrectangle","circle","filledcircle","ellipse","filledellipse","arrow","textbox","moustache1"],
 		clearButton: {"text": "Clear Canvas"},
 		saveButton: null,
 		undoButton: {"text":"undo"},
@@ -328,6 +328,9 @@ var RoCanvas= function () {
 			        	break;
 					case 'textbox':		
 						break; //text box is handled on mouseUp...
+					case 'moustache1':
+						self.canvas_moustache1(self.startX,self.startY,pgX,pgY);
+						break;
 					default:
 						self.addClick(pgX, pgY, true);
 						break;
@@ -415,6 +418,45 @@ var RoCanvas= function () {
 		self.context.stroke();
 		self.context.closePath(); 
 	}
+
+	this.canvas_moustache1 = function(fromx, fromy, tox, toy){
+		
+		/*
+				    BL1  	BR1
+			---------X-------X-----------
+			|  							|
+		 P1	X			P0				| P2
+			|							|						
+			----X-------------------X----
+			   BL2				   BR2
+		*/
+
+		var dx = tox-fromx;
+		var dy = toy-fromy;
+		
+		var p0y = p1y = p2y = fromy+dy/2;
+		var p0x = fromx+dx/2;
+		var p1x = fromx;
+		var p2x = tox;
+
+		var bl1y = br1y = fromy;
+		var bl1x = p0x-(dx/8);
+		var br1x = p2x-(dx/8);
+
+		var bl2y = br2y = toy;
+		var bl2x = p0x-(dx/3);
+		var br2x = p2x-(dx/3);		
+
+		self.context.beginPath();			            
+		self.context.moveTo(p0x, p0y);		
+		self.context.bezierCurveTo(br1x, br1y, br2x, br2y, p2x, p2y);
+		self.context.moveTo(p0x, p0y);
+		self.context.bezierCurveTo(bl1x, bl1y, bl2x, bl2y, p1x, p1y);
+
+		self.context.stroke();
+		self.context.closePath(); 
+	}
+
 
 	this.addClick = function(x, y, dragging)
 	{
