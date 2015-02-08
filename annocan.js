@@ -249,11 +249,13 @@ var RoCanvas= function () {
 		
 
 		// on mouse down
-		self.canvas.addEventListener('mousedown', function(e){			
-		  var mouseX = (e.pageX - this.offsetLeft - self.hardOffsetX)*self.factor;
-		  self.startX=mouseX;
-		  var mouseY = (e.pageY - this.offsetTop - self.hardOffsetY)*self.factor;		  
-		  self.startY=mouseY;
+		$(self.canvas).bind('mousedown touchstart', function (e) {
+				
+		  var grr = (event.type.toLowerCase() === 'mousedown') ? event : e.originalEvent.touches[0];
+            var mouseX = (grr.pageX - this.offsetLeft - self.hardOffsetX) * self.factor;
+            self.startX = mouseX;
+            var mouseY = (grr.pageY - this.offsetTop - self.hardOffsetY) * self.factor;
+            self.startY = mouseY;
 		
 		  
 		  
@@ -265,20 +267,19 @@ var RoCanvas= function () {
 				self.addClick(mouseX, mouseY);
 				self.redraw();
 		  }
-		}, false);
+		});
 		
 		// on dragging
-		self.canvas.addEventListener('mousemove', function(e)
-		{
+		$(self.canvas).bind('mousemove touchmove', function (e) {
 		    if(self.paint)
 		    {		    	
 
 				// clear canvas to last saved state	
-				self.context.clearRect(0,0,self.canvas.width,self.canvas.height); 
-				self.context.drawImage(self.currentBgImage,0,0);
-
-				var pgY = (e.pageY - this.offsetTop - self.hardOffsetY)*self.factor;
-				var pgX = (e.pageX - this.offsetLeft - self.hardOffsetX)*self.factor;
+				self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                self.context.drawImage(self.currentBgImage, 0, 0);
+                var grr = (event.type.toLowerCase() === 'mousemove') ? event : e.originalEvent.touches[0];
+                var pgY = (grr.pageY - this.offsetTop - self.hardOffsetY) * self.factor;
+                var pgX = (grr.pageX - this.offsetLeft - self.hardOffsetX) * self.factor;
 
 				// draw different shapes				
 				switch(self.drawTool)
@@ -337,10 +338,10 @@ var RoCanvas= function () {
 			}		    
 		    self.redraw();
 		  }
-		}, false);
+		});
 		
 		// when mouse is released
-		self.canvas.addEventListener('mouseup', function(e){
+		$(self.canvas).bind('mouseup touchend', function (e) {
 
 			self.paint = false;
 		  
@@ -368,11 +369,11 @@ var RoCanvas= function () {
 
 			//update the current background state
 		 	self.updateCurrentState();
-		}, false);
+		});
 		
-		this.canvas.addEventListener('mouseleave', function(e){
+		$(self.canvas).bind('mouseleave touchleave', function (e) { //touchleave is not really implemented...
 		  self.paint = false;
-		}, false);
+		});
 	};
 	
     this.drawEllipseByCenter = function(cx, cy, w, h) {
