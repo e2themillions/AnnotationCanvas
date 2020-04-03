@@ -357,6 +357,7 @@ var RoCanvas= function () {
 				case 'textbox':
 					//show popup asking for the text..
 					var userInput = prompt("Text", "");
+					if (!userInput) break;
 					self.context.beginPath();			            
 					self.context.font = "34pt Arial";
 					self.context.fillText(userInput, self.startX, self.startY+50);
